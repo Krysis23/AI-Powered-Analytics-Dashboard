@@ -98,5 +98,56 @@ def chart():
         return jsonify({"error": "No data available"}),400
     body = request.get_json(force=True)
     try:
+        fig_json = render_chart_json(
+            df,
+            chart_type=body["chart_type"],
+            x=body["x"],
+            y=body.get("y"),
+            color=body.get("color"),
+            title=body.get("title","")
+        )
+        return jsonify({"chart": fig_json})
+    except Exception as e:
+        return jsonify({"error": str(e)}),400
+    
+@app.route("/api/nl-query", methods=["POST"])
+def nl_query():
+    df = get_df("clean_df") or get_df("raw_df")
+    if df is None:
+        return jsonify({"error": "No data available"}),400
+    body = request.get_json(force=True)
+    question = body.get("question", "").strip()
+    if not question:
+        return jsonify({"error": "Empty question"}), 400
+    try:
+        result_df = nl_to_dataframe(question, df)
+        chart_json = None
+        if result_df.shape[1] == 2:
+           cols =result_df.columns.tolist()
+           if pd.api.types.is_numeric_dtype(result_df[cols[1]]):
+               chart_json =render_chart_json(
+                   result_df, "bar", x=cols[0], y=cols[1],
+                   title=question[:60]
+               )
+        return jsonify({
+            "table": result_df.head(50).to_dict(orient="records"),
+            "columns": result_df.columns.tolist(),
+            "charts":chart_json
+        }) 
+    except Exception as e:
+        return jsonify({"error": str(e)}),400
+    
+@app.route("/api/download")
+def download():
+    df = get_df("clean_df")
+    if df is None:
+        return jsonify({"error": "No cleaned data"}),400
+    path = f"uploads/{uuid.uuid4.hex}_cleaned.csv"
+    df.to_csv(path,index=False)
+    return send_file(path, as_attachment=True, download_name="cleaned_data.csv")
+
+
+if __name__ == "__main__":
+    app.run(debug=True, port=5000)
         
     
