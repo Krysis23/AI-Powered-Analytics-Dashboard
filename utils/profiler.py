@@ -59,7 +59,7 @@ def profile_dataframe(df: pd.DataFrame) -> List[ColumnProfile]:
             max_val = round(float(s.max()), 4) if s.notna.any() else None
             mean_val = round(float(s.mean()), 4) if s.notna.any() else None
         elif itype == "datatime":
-            min_val = str(s.min()) if s.notna().any() else Non 
+            min_val = str(s.min()) if s.notna().any() else None
             max_val = str(s.max()) if s.notna().any() else None
             mean_val = None
         else:
