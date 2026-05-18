@@ -4,8 +4,8 @@ from dotenv import load_dotenv
 import pandas as pd
 
 
-from utils.loader import load_file
-from utils.profiler import profile_dataframe
+from utils.loader import load_file,allowed_file
+from utils.profiler import profile_dataframe,profile_to_dict
 from utils.cleaner import clean
 from utils.charts import render_chart_json
 from utils.nl_query import nl_to_dataframe
