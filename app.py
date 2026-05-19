@@ -22,12 +22,12 @@ os.makedirs("uploads", exist_ok=True)
 def get_df(key="clean_df") -> pd.DataFrame | None:
     path = session.get(key)
     if path and os.path.exists(path):
-        return pd.read_parquet(path)
+        return pd.read_pickle(path)
     return None
 
 def save_df(df: pd.DataFrame, key:str) -> str:
-    path = f"uploads/{uuid.uuid().hex}.parquet"
-    df.to_parquet(path, index=False)
+    path = f"uploads/{uuid.uuid4().hex}.pkl"
+    df.to_pickle(path)
     session[key] = path
     return path
 
@@ -92,8 +92,13 @@ def clean_data():
         return jsonify({"error": str(e)}),400
     
 @app.route("/api/chart", methods=["POST"])
+def get_activate_df():
+    df = get_df("clean_df")
+    if df is None:
+        df = get_df("raw_df")
+    return df
 def chart():
-    df =get_df("clean_df") or get_df("raw_df")
+    df =get_activate_df()
     if df is None:
         return jsonify({"error": "No data available"}),400
     body = request.get_json(force=True)
@@ -112,7 +117,7 @@ def chart():
     
 @app.route("/api/nl-query", methods=["POST"])
 def nl_query():
-    df = get_df("clean_df") or get_df("raw_df")
+    df = get_activate_df()
     if df is None:
         return jsonify({"error": "No data available"}),400
     body = request.get_json(force=True)
@@ -142,7 +147,7 @@ def download():
     df = get_df("clean_df")
     if df is None:
         return jsonify({"error": "No cleaned data"}),400
-    path = f"uploads/{uuid.uuid4.hex}_cleaned.csv"
+    path = f"uploads/{uuid.uuid4().hex}_cleaned.csv"
     df.to_csv(path,index=False)
     return send_file(path, as_attachment=True, download_name="cleaned_data.csv")
 

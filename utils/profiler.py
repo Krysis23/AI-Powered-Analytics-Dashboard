@@ -55,9 +55,9 @@ def profile_dataframe(df: pd.DataFrame) -> List[ColumnProfile]:
         itype = infer_type(s)
 
         if itype == "numeric":
-            min_val = round(float(s.min()), 4) if s.notna.any() else None
-            max_val = round(float(s.max()), 4) if s.notna.any() else None
-            mean_val = round(float(s.mean()), 4) if s.notna.any() else None
+            min_val = round(float(s.min()), 4) if s.notna().any() else None
+            max_val = round(float(s.max()), 4) if s.notna().any() else None
+            mean_val = round(float(s.mean()), 4) if s.notna().any() else None
         elif itype == "datatime":
             min_val = str(s.min()) if s.notna().any() else None
             max_val = str(s.max()) if s.notna().any() else None
@@ -72,8 +72,7 @@ def profile_dataframe(df: pd.DataFrame) -> List[ColumnProfile]:
             inferred_type = itype,
             missing_count = missing_count,
             missing_pct = round(missing_count/max(len(s), 1)* 100, 1),
-            n_unique = int(s.unique()),
-            min_val = min_val,
+            n_unique = int(s.nunique()),            min_val = min_val,
             max_val = max_val,
             mean_val = mean_val,
             sample_values = [str(v) for v in s.dropna().unique()[:5].tolist()]

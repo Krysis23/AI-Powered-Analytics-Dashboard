@@ -54,7 +54,7 @@ def clean(df:pd.DataFrame, config:dict) -> tuple[pd.DataFrame, CleaningReport]:
     missing_rates = df.isna().mean()*100
     drop_cols = missing_rates[missing_rates > null_threshold].index.tolist()
     if drop_cols:
-        df.drop(columns=drop_cols, inplace=True)
+        df.drop(columns=drop_cols)
         report.cols_dropped.extend(drop_cols)
         report.steps.append(
             f"Dropped {len(drop_cols)} column(s) with > {null_threshold}% missing: "
@@ -63,7 +63,7 @@ def clean(df:pd.DataFrame, config:dict) -> tuple[pd.DataFrame, CleaningReport]:
 
     if config.get("drop_duplicate_rows", True):
         before = len(df)
-        df.drop_duplicates(inplace=True)
+        df.drop_duplicates()
         removed = before  - len(df)
         if removed:
             report.steps.append(f"Removed {removed:,} duplicate rows")
@@ -88,7 +88,7 @@ def clean(df:pd.DataFrame, config:dict) -> tuple[pd.DataFrame, CleaningReport]:
             profiles = profile_dataframe(df)
             id_cols = [p.name for p in profiles if p.inferred_type == "id"]
             if id_cols:
-                df.drop(columns=id_cols, inplace=True)
+                df.drop(columns=id_cols)
                 report.cols_dropped.extend(id_cols)
                 report.steps.append(f"Dropped ID-like columns: {id_cols}")
 
@@ -105,14 +105,14 @@ def clean(df:pd.DataFrame, config:dict) -> tuple[pd.DataFrame, CleaningReport]:
 
         if strategy == "fill_mean":
             fill_val = df[col].mean()
-            df[col].fillna(round(fill_val, 4), inplace=True)
+            df[col].fillna(round(fill_val, 4))
         elif strategy == "fill_median":
             fill_val = df[col].median()
-            df[col].fillna(fill_val, inplace=True)
+            df[col].fillna(fill_val)
         elif strategy == "fill_zero":
-            df[col].fillna(0,inplace=True)
+            df[col].fillna(0)
         elif strategy == "drop_rows":
-            df.dropna(subset=[col], inplace=True)
+            df.dropna(subset=[col])
 
         report.nulls_filled[col] = n_null
 
@@ -133,7 +133,7 @@ def clean(df:pd.DataFrame, config:dict) -> tuple[pd.DataFrame, CleaningReport]:
             continue
         mode = df[col].mode()
         fill_val = mode[0] if not mode.empty else "Unknown"
-        df[col].fillna(fill_val, inplace=True)
+        df[col].fillna(fill_val)
         cat_filled[col] = n_null
 
 
