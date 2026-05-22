@@ -8,4 +8,5 @@ python-dotenv
 gunicorn
 pytest
 pytest-cov
+google-genai
 
