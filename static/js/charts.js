@@ -28,6 +28,11 @@ document.getElementById("btn-chart").addEventListener("click", async () => {
     return;
   }
 
+  if (color && window.COLUMNS && !window.COLUMNS.includes(color)) {
+    alert("Please select a valid color column from the current dataset.");
+    return;
+  }
+
   const btn = document.getElementById("btn-chart");
   btn.textContent = "Generating...";
   btn.disabled = true;

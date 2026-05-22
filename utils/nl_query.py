@@ -1,11 +1,19 @@
 import os
+import pathlib
 import pandas as pd
 import google.generativeai as genai
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
 
-load_dotenv()
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-client = genai.GenerativeModel("gemini-2.5-flash")
+project_root = pathlib.Path(__file__).resolve().parents[1]
+load_dotenv(find_dotenv(usecwd=True) or project_root / ".env")
+api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+if not api_key:
+    raise RuntimeError(
+        "No Gemini API key found. Set GEMINI_API_KEY or GOOGLE_API_KEY, "
+        "or call genai.configure(api_key=my_api_key) manually."
+    )
+genai.configure(api_key=api_key)
+client = genai.GenerativeModel("models/gemini-2.5-flash")
 
 
 def build_system_prompt(df: pd.DataFrame) -> str:
@@ -48,10 +56,7 @@ def nl_to_dataframe(question: str, df:pd.DataFrame) -> pd.DataFrame:
     
     prompt = build_system_prompt(df) + f"\n\nUser Question:\n{question}"
     
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt
-    )
+    response = client.generate_content(prompt)
 
     raw_code = response.text.strip()
 

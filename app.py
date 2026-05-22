@@ -91,14 +91,15 @@ def clean_data():
     except Exception as e:
         return jsonify({"error": str(e)}),400
     
-@app.route("/api/chart", methods=["POST"])
 def get_activate_df():
     df = get_df("clean_df")
     if df is None:
         df = get_df("raw_df")
     return df
+
+@app.route("/api/chart", methods=["POST"])
 def chart():
-    df =get_activate_df()
+    df = get_activate_df()
     if df is None:
         return jsonify({"error": "No data available"}),400
     body = request.get_json(force=True)
